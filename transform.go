@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/araddon/dateparse"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -65,9 +66,65 @@ func (remain Ellipsize) Transform(ctx *Context, input string) string {
 	}
 	remain -= 1 // account for the ellipsis
 	chomped := length - int(remain)
-	start := int(remain)/2
+	start := int(remain) / 2
 	end := start + chomped
 	return input[:start] + "…" + input[end:]
+}
+
+// PackageFold
+type JvmClassPathFold int
+
+func (cap JvmClassPathFold) Transform(ctx *Context, input string) string {
+	if ctx.DisableTruncate {
+		return input
+	}
+	length := utf8.RuneCountInString(input)
+	if length <= int(cap) {
+		return input
+	}
+	remaining := int(cap)
+	output := ""
+	parts := strings.Split(input, ".")
+	className := parts[len(parts)-1]
+	doCompact := false
+	// class name
+	if len(className) <= remaining {
+		output = className
+		remaining -= len(output)
+	} else {
+		classNameParts := strings.Split(regexp.MustCompile("(.)([A-Z]|(?:\\$+))").ReplaceAllString(className, "${1}_${2}"), "_")
+		for i, v := range classNameParts {
+			remainingUpperLetters := len(classNameParts) - i - 1
+			if doCompact == false && (len(v)+remainingUpperLetters) > remaining {
+				doCompact = true
+			}
+			if doCompact {
+				cut := remaining - remainingUpperLetters
+				output += v[:cut+1]
+				remaining -= cut
+			} else {
+				output += v
+				remaining -= len(v)
+			}
+		}
+	}
+	// packages
+	for i := len(parts) - 2; i >= 0; i-- {
+		if doCompact == false && (i*2)+1+len(parts[i]) >= remaining {
+			doCompact = true
+		}
+		if doCompact {
+			if remaining > 1 {
+				output = string(parts[i][0]) + "." + output
+				remaining -= 2
+			}
+		} else {
+			output = parts[i] + "." + output
+			remaining -= len(parts[i])
+			remaining -= 1
+		}
+	}
+	return output
 }
 
 // LeftPad pads the left side of the string with spaces so that the string becomes the requested length.
