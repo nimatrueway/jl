@@ -37,17 +37,19 @@ type FieldFmt struct {
 // for most types of logs.
 var DefaultCompactPrinterFieldFmt = []FieldFmt{{
 	Name:         "level",
-	Finders: []FieldFinder{ByNames("level", "severity")},
+	Finders:      []FieldFinder{ByNames("level", "severity")},
 	Transformers: []Transformer{Truncate(4), UpperCase, ColorMap(LevelColors)},
 }, {
 	Name:    "time",
-	Finders: []FieldFinder{ByNames("timestamp", "time")},
+	Finders: []FieldFinder{ByNames("timestamp", "time", "@timestamp")},
 }, {
 	Name:         "thread",
+	Finders:      []FieldFinder{ByNames("thead", "thread_name")},
 	Transformers: []Transformer{Ellipsize(16), Format("[%s]"), RightPad(18), ColorSequence(AllColors)},
 }, {
 	Name:         "logger",
-	Transformers: []Transformer{Ellipsize(20), Format("%s|"), LeftPad(21), ColorSequence(AllColors)},
+	Finders:      []FieldFinder{ByNames("logger", "logger_name")},
+	Transformers: []Transformer{Format("%s|"), LeftPad(30), ColorSequence(AllColors)},
 }, {
 	Name:    "message",
 	Finders: []FieldFinder{ByNames("message", "msg", "textPayload", "jsonPayload.message")},
