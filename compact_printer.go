@@ -40,8 +40,9 @@ var DefaultCompactPrinterFieldFmt = []FieldFmt{{
 	Finders:      []FieldFinder{ByNames("level", "severity")},
 	Transformers: []Transformer{Truncate(4), UpperCase, ColorMap(LevelColors)},
 }, {
-	Name:    "time",
-	Finders: []FieldFinder{ByNames("timestamp", "time", "@timestamp")},
+	Name:         "time",
+	Finders:      []FieldFinder{ByNames("timestamp", "time", "@timestamp")},
+	Transformers: []Transformer{TimeFormatter("2006-01-02 15:04:05")},
 }, {
 	Name:         "thread",
 	Finders:      []FieldFinder{ByNames("thead", "thread_name")},

@@ -3,7 +3,9 @@ package jl
 import (
 	"bytes"
 	"fmt"
+	"github.com/araddon/dateparse"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -105,4 +107,14 @@ type Format string
 
 func (t Format) Transform(ctx *Context, input string) string {
 	return fmt.Sprintf(string(t), input)
+}
+
+type TimeFormatter string
+
+func (t TimeFormatter) Transform(ctx *Context, input string) string {
+	date, err := dateparse.ParseLocal(ctx.Original)
+	if err != nil {
+		return input
+	}
+	return date.In(time.Local).Format(string(t))
 }
