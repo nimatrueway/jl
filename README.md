@@ -7,7 +7,11 @@ jl (JL) is a parser and formatter for JSON logs, making machine-readable JSON lo
 ## Installing
 
 ```
-go get -u github.com/nimatrueway/jl/cmd/jl
+git clone github.com/nimatrueway/jl/cmd/jl
+cd jl
+go build -o jl cmd/jl/main.go
+chmod +x jl
+cp ./jl /usr/local/bin
 ```
 
 ## Usage
